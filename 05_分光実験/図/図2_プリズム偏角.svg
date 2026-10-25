@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1080" width="1000" height="1080">
+<defs>
+  <marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+    <path d="M0,1 L11,6 L0,11 z" fill="#000"/>
+  </marker>
+  <marker id="b" markerWidth="12" markerHeight="12" refX="2" refY="6" orient="auto">
+    <path d="M12,1 L1,6 L12,11 z" fill="#000"/>
+  </marker>
+</defs>
+<style>
+  .ln{stroke:#000;fill:none}
+  .s3{stroke-width:3}
+  .s4{stroke-width:4}
+  .s8{stroke-width:9}
+  .dsh{stroke-dasharray:20 12}
+  .dot{stroke-dasharray:5 7;stroke-width:2}
+  text{font-family:'Noto Sans CJK JP',sans-serif;font-size:34px;fill:#000}
+  .v{font-family:'DejaVu Serif';font-style:italic;font-size:44px}
+  .sub{font-size:27px;font-style:normal}
+</style>
+
+<!-- 基準線（偏角 0 の方向） -->
+<line class="ln s3" x1="60" y1="820" x2="910" y2="820"/>
+
+<!-- プリズム -->
+<polygon points="120,755 250,688 250,820" fill="#fff" stroke="#000" stroke-width="4"/>
+
+<!-- 入射光 -->
+<line class="ln s3" x1="52" y1="884" x2="128" y2="800" marker-end="url(#a)"/>
+<text x="24" y="914">入射光</text>
+
+<!-- スクリーン -->
+<line class="ln s8" x1="556" y1="320" x2="884" y2="320"/>
+<text x="610" y="286">スクリーン</text>
+
+<!-- 屈折光 -->
+<line class="ln s4 dsh" x1="252" y1="818" x2="694" y2="330" marker-end="url(#a)"/>
+<text x="398" y="520">屈折光</text>
+
+<!-- δ0 の弧 -->
+<path class="ln s3" d="M 400 820 A 150 150 0 0 0 350 708"/>
+<text class="v" x="396" y="782">δ</text><text class="sub" x="424" y="794" style="font-family:DejaVu Serif">0</text>
+
+<!-- L -->
+<line class="ln dot" x1="840" y1="330" x2="840" y2="812"/>
+<line class="ln s3" x1="840" y1="320" x2="840" y2="820" marker-start="url(#b)" marker-end="url(#a)"/>
+<text class="v" x="866" y="586">L</text>
+
+<!-- x -->
+<line class="ln dot" x1="700" y1="330" x2="700" y2="900"/>
+<line class="ln s3" x1="250" y1="886" x2="700" y2="886" marker-start="url(#b)" marker-end="url(#a)"/>
+<text class="v" x="462" y="946">x</text>
+<line class="ln dot" x1="250" y1="824" x2="250" y2="900"/>
+
+<!-- 輝線の点 -->
+<circle cx="700" cy="320" r="9" fill="#000"/>
+
+<!-- ラベル -->
+<text x="34" y="612">プリズム</text>
+<text x="34" y="652">（頂角 α = 60°）</text>
+</svg>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1000" width="1100" height="1000">
+<defs>
+  <marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+    <path d="M0,1 L11,6 L0,11 z" fill="#000"/>
+  </marker>
+  <marker id="b" markerWidth="12" markerHeight="12" refX="2" refY="6" orient="auto">
+    <path d="M12,1 L1,6 L12,11 z" fill="#000"/>
+  </marker>
+  <pattern id="gr" width="10" height="9" patternUnits="userSpaceOnUse">
+    <rect width="10" height="9" fill="#fff"/>
+    <line x1="0" y1="4.5" x2="10" y2="4.5" stroke="#000" stroke-width="2.5"/>
+  </pattern>
+</defs>
+<style>
+  .ln{stroke:#000;fill:none}
+  .s3{stroke-width:3}
+  .s4{stroke-width:4}
+  .s8{stroke-width:9}
+  .dsh{stroke-dasharray:20 12}
+  .dot{stroke-dasharray:5 7;stroke-width:2}
+  text{font-family:'Noto Sans CJK JP',sans-serif;font-size:34px;fill:#000}
+  .v{font-family:'DejaVu Serif';font-style:italic;font-size:44px}
+  .sub{font-size:27px;font-style:normal}
+</style>
+
+<!-- 回転ステージ + 反射型回折格子 -->
+<circle cx="900" cy="620" r="66" fill="#d8d8d8" stroke="#000" stroke-width="4"/>
+<rect x="888" y="562" width="24" height="116" fill="url(#gr)" stroke="#000" stroke-width="3"/>
+
+<!-- 光軸（入射光 / 0次光） -->
+<line class="ln s3" x1="250" y1="620" x2="828" y2="620" marker-end="url(#a)"/>
+<line class="ln s3" x1="430" y1="620" x2="256" y2="620" marker-end="url(#a)"/>
+
+<!-- スクリーン -->
+<line class="ln s8" x1="430" y1="170" x2="430" y2="560"/>
+
+<!-- 1次回折光 -->
+<line class="ln s4 dsh" x1="876" y1="604" x2="443" y2="233" marker-end="url(#a)"/>
+<!-- -1次回折光（参考） -->
+<line class="ln s4 dsh" x1="876" y1="636" x2="596" y2="876" marker-end="url(#a)"/>
+
+<!-- θ の弧 -->
+<path class="ln s3" d="M 740 620 A 160 160 0 0 1 777 518"/>
+
+<!-- L -->
+<line class="ln s3" x1="430" y1="100" x2="900" y2="100" marker-start="url(#b)" marker-end="url(#a)"/>
+<line class="ln dot" x1="430" y1="160" x2="430" y2="90"/>
+<line class="ln dot" x1="900" y1="548" x2="900" y2="90"/>
+<text class="v" x="650" y="82">L</text>
+
+<!-- 目盛の原点・輝線のガイド -->
+<line class="ln dot" x1="330" y1="486" x2="440" y2="486"/>
+<line class="ln dot" x1="330" y1="226" x2="440" y2="226"/>
+<line class="ln dot" x1="330" y1="620" x2="430" y2="620"/>
+
+<!-- x0 と x1 -->
+<line class="ln s3" x1="330" y1="618" x2="330" y2="498" marker-start="url(#b)" marker-end="url(#a)"/>
+<line class="ln s3" x1="330" y1="474" x2="330" y2="228" marker-start="url(#b)" marker-end="url(#a)"/>
+<text class="v" x="258" y="568">x<tspan class="sub" dy="12">0</tspan></text>
+<text class="v" x="258" y="370">x<tspan class="sub" dy="12">1</tspan></text>
+
+<!-- 輝線の点 -->
+<circle cx="430" cy="226" r="9" fill="#000"/>
+
+<!-- ラベル -->
+<text x="716" y="594" class="v">θ</text>
+<text x="590" y="352">m = +1</text>
+<text x="470" y="892">m = −1</text>
+<text x="920" y="770" text-anchor="middle">反射型回折格子</text>
+<text x="446" y="152">スクリーン</text>
+<text x="458" y="222">輝線</text>
+<text x="452" y="500">目盛の原点</text>
+<text x="700" y="676">入射光</text>
+<text x="300" y="676">0次光（反射光）</text>
+<text x="128" y="600">光軸</text>
+</svg>

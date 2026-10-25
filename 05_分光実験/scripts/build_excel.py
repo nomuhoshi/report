@@ -164,7 +164,7 @@ for i,(lamp,col,x0,L,xl,xm,xr,lit,note,fl) in enumerate(rows):
     ws1.row_dimensions[r].height=40
 for col,w in zip('ABCDEFGHIJKLMNO',[2,26,20,9,9,11,11,11,14,10,10,12,13,11,62]):
     ws1.column_dimensions[col].width=w
-ws1.freeze_panes='D%d'%(HR+1)
+# ws1 は行数が少ないので固定しない
 
 # =============================================== 実験2_屈折率
 ws2 = wb.create_sheet('実験2_屈折率')
@@ -275,7 +275,7 @@ make_chart(w32,[(Reference(w32,min_col=9,min_row=FC,max_row=rr-1),
                  Reference(w32,min_col=5,min_row=6,max_row=8),'Cd 輝線','FF0000',None)],
            (200,860,100,'0','マイクロメータ読み x [目盛]'),(400,700,50,'0','波長 λ [nm]'),'L39')
 
-w32.freeze_panes='B%d'%(DR+1)
+# w32 は見出しが21行あり，固定すると画面に収まらないので固定しない
 
 # =============================================== 実験3-3 分解能
 w33 = wb.create_sheet('実験3-3_分解能')
@@ -363,22 +363,144 @@ an=[('測定範囲 [nm]','=TEXT(MIN(D%d:D%d),"0")&" 〜 "&TEXT(MAX(D%d:D%d),"0")
 for i,(lab,f,fmt,note) in enumerate(an):
     r2=6+i; put(w34,'F%d'%r2,lab,al=left); put(w34,'G%d'%r2,f,fmt=fmt)
     if note: put(w34,'H%d'%r2,note,f_note,al=nowrap,border=False)
+# --- 半値幅（線形内挿）。行番号は L0 + データ番号
+put(w34,'F12','スペクトル幅（半値幅）',f_bold,al=left,border=False)
+head(w34,13,'FGH',['項目','長波長側の山','短波長側の山'],18)
+def w34row(rr,lab,fa,fb,fmt,note=None,blue=False):
+    put(w34,'F%d'%rr,lab,al=left); put(w34,'G%d'%rr,fa,fmt=fmt); put(w34,'H%d'%rr,fb,fmt=fmt)
+    if note: put(w34,'I%d'%rr,note,f_note,al=nowrap,border=False)
+BG_L, BG_S = 0, 0.0312
+w34row(14,'背景 I_b [V]',BG_L,BG_S,'0.0000','長波長側は 0、短波長側は 2 つの山の谷（x=675, 700 の値）を背景とした')
+w34['G14'].font=f_in; w34['H14'].font=f_in; w34['H14'].fill=fill_chk
+w34row(15,'ピーク I_p [V]','=G7','=G9','0.0000')
+w34row(16,'半値 I_h [V]','=G14+(G15-G14)/2','=H14+(H15-H14)/2','0.0000')
+w34row(17,'左交点 x_L [目盛]',
+       '=B%d+(G16-C%d)*(B%d-B%d)/(C%d-C%d)'%(L0+2,L0+2,L0+3,L0+2,L0+3,L0+2),
+       '=B%d+(H16-C%d)*(B%d-B%d)/(C%d-C%d)'%(L0+46,L0+46,L0+47,L0+46,L0+47,L0+46),'0.0',
+       '内挿区間：長波長側は x=250→275、短波長側は x=752→754')
+w34row(18,'右交点 x_R [目盛]',
+       '=B%d+(G16-C%d)*(B%d-B%d)/(C%d-C%d)'%(L0+16,L0+16,L0+17,L0+16,L0+17,L0+16),
+       '=B%d+(H16-C%d)*(B%d-B%d)/(C%d-C%d)'%(L0+64,L0+64,L0+65,L0+64,L0+65,L0+64),'0.0',
+       '内挿区間：長波長側は x=600→625、短波長側は x=795→800')
+w34row(19,'半値幅 Δλ [nm]',
+       '=ABS((%sC$12*G17^2+%sC$13*G17+%sC$14)-(%sC$12*G18^2+%sC$13*G18+%sC$14))'%(cal,cal,cal,cal,cal,cal),
+       '=ABS((%sC$12*H17^2+%sC$13*H17+%sC$14)-(%sC$12*H18^2+%sC$13*H18+%sC$14))'%(cal,cal,cal,cal,cal,cal),'0')
+
 make_chart(w34,[(Reference(w34,min_col=4,min_row=L0,max_row=LE),
                  Reference(w34,min_col=3,min_row=L0,max_row=LE),None,None,'000000')],
-           (420,680,40,'0','波長 λ [nm]'),(0,0.22,0.02,'0.00','出力電圧 I [V]'),'F13',w=16,h=9.5)
-for col,w in zip('ABCDEFGH',[2,11,12,12,3,24,14,56]): w34.column_dimensions[col].width=w
+           (420,680,40,'0','波長 λ [nm]'),(0,0.22,0.02,'0.00','出力電圧 I [V]'),'F21',w=16,h=9.5)
+for col,w in zip('ABCDEFGHI',[2,11,12,12,3,24,15,15,62]): w34.column_dimensions[col].width=w
 w34.freeze_panes='B%d'%(DR4+1)
+
+# =============================================== 実験結果（報告書の表をそのまま）
+from openpyxl.styles import Alignment as _Al
+wr = wb.create_sheet('実験結果')
+wr.sheet_view.showGridLines = False
+S1="'実験1_波長'!"; S2="'実験2_屈折率'!"; S32="'実験3-2_波長校正'!"; S33="'実験3-3_分解能'!"; S34="'実験3-4_白色LED'!"
+
+# 報告書と同じ書式（游明朝 10.5 pt、見出しは太字＋薄いグレー、細い黒罫線）
+MIN='游明朝'
+m_norm  = Font(name=MIN, size=10.5)
+m_bold  = Font(name=MIN, size=10.5, bold=True)
+m_title = Font(name=MIN, size=14, bold=True)
+m_note  = Font(name=MIN, size=9, color='595959')
+fill_h  = None   # 見出しは白（塗りつぶしなし）
+bk = Side(style='thin', color='000000')
+bx = Border(left=bk, right=bk, top=bk, bottom=bk)
+ctr2 = _Al(horizontal='center', vertical='center', wrap_text=True)
+
+put(wr,'B1','実験結果　（報告書の表1〜表8をそのまま）',m_title,al=nowrap,border=False)
+put(wr,'B2','報告書と同じ列・同じ並び・同じ桁数。数値は各シートを参照しているので、元データを直せばここも変わる。',m_note,al=nowrap,border=False)
+
+COLS='BCDEFGHIJK'
+def rtable(row, caption, headers, rows, fmts, ncol):
+    cs = COLS[:ncol]
+    put(wr,'%s%d'%(cs[0],row), caption, m_bold, al=nowrap, border=False)
+    for c,h in zip(cs,headers):
+        cell=put(wr,'%s%d'%(c,row+1), h, m_bold, fill=fill_h, al=ctr2); cell.border=bx
+    # 見出し行は自動高さ
+    for i,rw in enumerate(rows):
+        for c,v,f in zip(cs,rw,fmts):
+            cell=put(wr,'%s%d'%(c,row+2+i), v, m_norm, fmt=f, al=ctr2); cell.border=bx
+    return row+2+len(rows)
+
+# ---- 表1
+r1=[]
+for lamp,color,src in [('Na','オレンジ',12),('Hg','オレンジ',14),('Hg','緑',15),('Hg','青',16),
+                       ('Cd','赤',17),('Cd','緑',18),('Cd','水色',19),('Cd','青',20)]:
+    d=lambda col:'=IF(%s%s%d="","—",TEXT(%s%s%d,"0.0"))'%(S1,col,src,S1,col,src)
+    r1.append([lamp,color,d('F'),d('G'),d('H'),'=%sI%d'%(S1,src),'=%sJ%d'%(S1,src),
+               '=%sK%d'%(S1,src),'=%sL%d'%(S1,src),'=%sN%d'%(S1,src)])
+nx=rtable(4,'表1　各ランプの輝線の波長',
+  ['ランプ','色','x1 左 [mm]','x1 中 [mm]','x1 右 [mm]','x [mm]','θ [deg]','λ [nm]','文献値 [nm]','相対誤差 [%]'],
+  r1, [None,None,'@','@','@','0.0','0.00','0.0','0.0','0.0'], 10)
+
+# ---- 表2
+grp=[('D','E','F'),('G','H','I'),('J','K','L')]
+r2=[]
+for ci,color in enumerate(['赤','緑','水色','青']):
+    src=8+ci
+    for a,b,cc in grp:
+        r2.append([color,'=%sC%d'%(S2,src),'=%s%s$6'%(S2,a),'=%s%s%d'%(S2,a,src),
+                   '=%s%s%d'%(S2,b,src),'=%s%s%d'%(S2,cc,src)])
+nx=rtable(nx+1,'表2　各スクリーン位置における最小偏角と屈折率',
+  ['色','λ [nm]','L [mm]','x [mm]','δ₀ [deg]','n'], r2,
+  [None,'0.0','0','0','0.00','0.0000'], 6)
+
+# ---- 表3
+r3=[[c,'=%sC%d'%(S2,8+i),'=%sM%d'%(S2,8+i)] for i,c in enumerate(['赤','緑','水色','青'])]
+nx=rtable(nx+1,'表3　屈折率の平均値',['色','λ [nm]','n（3 回の平均）'], r3, [None,'0.0','0.0000'], 3)
+
+# ---- 表4
+r4=[]
+for i,(color,lit) in enumerate([('赤',None),('緑',None),('水色',None),('青','466.235 / 467.815')]):
+    src=6+i
+    r4.append([color,'=%sC%d'%(S32,src),'=%sD%d'%(S32,src),
+               lit if lit else '=TEXT(%sE%d,"0.000")'%(S32,src)])
+nx=rtable(nx+1,'表4　Cd ランプの輝線のピーク位置',
+  ['色','ピーク位置 x [目盛]','ピーク出力 [V]','文献波長 [nm]'],
+  r4, [None,'0.0','0.0000','@'], 4)
+put(wr,'G%d'%(nx-4),'校正には赤・緑・水色の3本を使った。青は2本の輝線が重なっているため使わなかった。',m_note,al=nowrap,border=False)
+
+# ---- 表5
+r5=[['=%sH%d/1000'%(S33,19+i),'=%sI%d'%(S33,19+i),'=%sJ%d'%(S33,19+i)] for i in range(2)]
+nx=rtable(nx+1,'表5　入射スリット幅とスペクトル幅（Cd 緑線 508.582 nm）',
+  ['入射スリット幅 [mm]','ピーク出力 [V]','半値幅 [nm]'], r5, ['0.0','0.0000','0.0'], 3)
+
+# ---- 表6
+r6=[['長波長側','=%sG8'%S34,'=%sG7'%S34,'=%sG19'%S34],
+    ['短波長側','=%sG10'%S34,'=%sG9'%S34,'=%sH19'%S34]]
+nx=rtable(nx+1,'表6　白色 LED のピーク波長とスペクトル幅',
+  ['山','ピーク波長 [nm]','ピーク出力 [V]','半値幅 [nm]'], r6, [None,'0.0','0.0000','0'], 4)
+
+# ---- 表7（課題 5.1）
+r7=[['赤','=%sL17'%S1,'Cd'],['オレンジ','=%sL12'%S1,'Na'],['オレンジ','=%sL14'%S1,'Hg'],
+    ['緑','=%sL15'%S1,'Hg'],['緑','=%sL18'%S1,'Cd'],['水色','=%sL19'%S1,'Cd'],
+    ['青','=%sL20'%S1,'Cd'],['青','=%sL16'%S1,'Hg']]
+nx=rtable(nx+1,'表7　観測した輝線の色と波長',['色','λ [nm]','光源'], r7, [None,'0.0',None], 3)
+
+# ---- 表8（課題 5.2）
+r8=[['Cd 緑線','=%sI15'%S33,'=%sI14'%S33],
+    ['白色 LED（長波長側）','=%sG8'%S34,'=%sG19'%S34],
+    ['白色 LED（短波長側）','=%sG10'%S34,'=%sH19'%S34]]
+nx=rtable(nx+1,'表8　輝線と白色 LED のスペクトル幅の比較',
+  ['光源','ピーク波長 [nm]','半値幅 [nm]'], r8, [None,'0.0','0.0'], 3)
+
+put(wr,'B%d'%(nx+1),'※ 表1〜表6 は報告書 第4章、表7・表8 は第5章 課題。',m_note,al=nowrap,border=False)
+for col,w in zip('ABCDEFGHIJK',[2,21,21,16,19,14,10,11,10,14,15]): wr.column_dimensions[col].width=w
+
 
 # =============================================== 説明
 ws0 = wb.create_sheet('説明')
 ws0.sheet_view.showGridLines = False
 put(ws0,'B1','分光実験　データ整理（第1週：実験1・2／第2週：実験3-2・3-3・3-4）',f_title,al=nowrap,border=False)
 lines=[('■ シート構成',1),
+ ('・実験結果：報告書 第4章の表1〜表6をまとめたもの。他シートを参照しているので，元データを直せば自動で変わる',0),
  ('・実験1_波長：Na・Hg・Cd の輝線から回折角 θ と波長 λ を計算し，文献値と比較',0),
  ('・実験2_屈折率：Cd 4色の最小偏角 δ0 → 屈折率 n，3回の平均，波長–屈折率のグラフ',0),
  ('・実験3-2_波長校正：Cd 掃引データ，4本のピーク同定，校正曲線 λ = A x² + B x + C，Cd スペクトルと校正曲線のグラフ',0),
  ('・実験3-3_分解能：緑線をスリット 0.1 mm / 1 mm で掃引，ピーク値と半値幅',0),
- ('・実験3-4_白色LED：LED 掃引データを波長に換算，スペクトルのグラフ',0),
+ ('・実験3-4_白色LED：LED 掃引データを波長に換算，スペクトルのグラフ，2 つの山の半値幅',0),
  ('・week_1：元のデータ（変更していません）',0),
  ('■ 色のルール',1),
  ('・青字＝手稿から転記した測定値／定数　・黒字＝Excel の公式　・緑＝ピーク　・黄色背景＝要確認',0),
@@ -403,7 +525,7 @@ ws0.column_dimensions['A'].width=2; ws0.column_dimensions['B'].width=16
 for col in 'CDEFGHIJKL': ws0.column_dimensions[col].width=14
 
 wb.move_sheet('説明', offset=-(len(wb.sheetnames)-1))
-order=['説明','実験1_波長','実験2_屈折率','実験3-2_波長校正','実験3-3_分解能','実験3-4_白色LED','week_1']
+order=['説明','実験結果','実験1_波長','実験2_屈折率','実験3-2_波長校正','実験3-3_分解能','実験3-4_白色LED','week_1']
 wb._sheets=[wb[n] for n in order]
 for w in wb:
     w.page_setup.orientation='landscape'; w.page_setup.fitToWidth=1; w.page_setup.fitToHeight=0
